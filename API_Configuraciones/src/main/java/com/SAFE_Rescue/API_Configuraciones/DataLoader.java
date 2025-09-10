@@ -2,12 +2,16 @@ package com.SAFE_Rescue.API_Configuraciones;
 
 import com.SAFE_Rescue.API_Configuraciones.modelo.Estado;
 import com.SAFE_Rescue.API_Configuraciones.modelo.Foto;
+import com.SAFE_Rescue.API_Configuraciones.modelo.Historial;
 import com.SAFE_Rescue.API_Configuraciones.repository.EstadoRepository;
 import com.SAFE_Rescue.API_Configuraciones.repository.FotoRepository;
+import com.SAFE_Rescue.API_Configuraciones.repository.HistorialRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,6 +28,9 @@ public class DataLoader implements CommandLineRunner {
 
     @Autowired
     private FotoRepository fotoRepository;
+
+    @Autowired
+    private HistorialRepository historialRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -69,5 +76,34 @@ public class DataLoader implements CommandLineRunner {
                 fotoRepository.save(foto);
             }
         });
+    }
+
+    /**
+     * Crea y guarda registros de historial de ejemplo.
+     * @param estadoActivo El objeto Estado con el que se asociarán los registros.
+     */
+    private void crearHistorial(Estado estadoActivo) {
+        if (historialRepository.count() == 0) {
+            Historial h1 = new Historial();
+            h1.setEstado(estadoActivo);
+            h1.setFechaHistorial(LocalDateTime.now().minusDays(10));
+            h1.setDetalle("Usuario 'admin' cambió el estado de un perfil a 'Activo'.");
+            historialRepository.save(h1);
+
+            Historial h2 = new Historial();
+            h2.setEstado(estadoActivo);
+            h2.setFechaHistorial(LocalDateTime.now().minusDays(5));
+            h2.setDetalle("Se creó un nuevo usuario bombero con ID 5.");
+            h2.setIdUsuarioReporte(5);
+            historialRepository.save(h2);
+
+            Historial h3 = new Historial();
+            h3.setEstado(estadoActivo);
+            h3.setFechaHistorial(LocalDateTime.now());
+            h3.setDetalle("Se envió un mensaje de alerta por un incidente.");
+            h3.setIdEnvioMensaje(10);
+            h3.setIdIncidente(20);
+            historialRepository.save(h3);
+        }
     }
 }
