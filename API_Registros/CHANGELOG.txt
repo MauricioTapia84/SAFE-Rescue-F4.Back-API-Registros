@@ -1,0 +1,29 @@
+╔══════════════════════════════════════════════╗
+║                REGISTRO DE CAMBIOS           ║
+╚══════════════════════════════════════════════╝
+❚❙❘ VERSIÓN 1.1.2+2025/10/02
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se realizan ajustes a historial service
+├─• Se realiza el Modelo, Repositorio, controllador y Service de Categoría
+├─• Se Agrega a historial la relación uno a muchos de Categoría
+├─• Se Arreglan los comentarios utilizando JavaDoc y swagger
+├─• Se Arreglan las validaciones de los servicios
+├─• Se agregan metodos y endpoints para buscar por nombre la categoria y estado
+├─• Se agregan metodos y endpoints para buscar por estado el historial
+└─• Se realizan pruebas de endpoints
+
+❚❙❘ VERSIÓN 1.1.1+2025/09/30
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se cambia el nombre de API de configuraciones a registros
+├─• Se realizan pruebas y ajustes con postman
+└─• Se modifica la lógica de historial service
+
+❚❙❘ VERSIÓN 1.1.0+2025/09/10
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+└─• Se agrega historial modelo, repositorio, service y controller
+
+❚❙❘ VERSIÓN 1.0.0+2025/09/09
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Versión inicial de programa se sigue la lógica de otras APIS
+└─• Se crean ciertas clases del modelo para pruebas
+

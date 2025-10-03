@@ -74,6 +74,28 @@ public class EstadoController {
     }
 
     /**
+     * Busca estados por su nombre (parcial o exacto).
+     * * @param nombre El nombre o parte del nombre del estado a buscar.
+     * @return ResponseEntity con la lista de estados coincidentes o NO_CONTENT.
+     */
+    @GetMapping("/buscar")
+    @Operation(summary = "Buscar estados por nombre", description = "Filtra la lista de estados por el nombre proporcionado.")
+    public ResponseEntity<List<Estado>> buscarEstadoPorNombre(
+            @Parameter(description = "Nombre del estado a buscar", required = true)
+            @RequestParam String nombre) {
+
+        List<Estado> estados = estadoService.findByNombre(nombre);
+
+        if (estados.isEmpty()) {
+            // Usa el builder noContent().build()
+            return ResponseEntity.noContent().build();
+        }
+
+        // HTTP 200 OK con la lista de resultados.
+        return ResponseEntity.ok(estados);
+    }
+
+    /**
      * Crea un nuevo estado.
      * @param estado Datos del estado a crear.
      * @return ResponseEntity con mensaje de confirmación o error.

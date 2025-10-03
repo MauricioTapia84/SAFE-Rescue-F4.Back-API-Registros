@@ -7,11 +7,15 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Repositorio para la gestión de Fotos
- * Maneja operaciones CRUD desde la base de datos usando Jakarta
+ * Repositorio de Spring Data JPA para la entidad {@link Foto}.
+ * <p>
+ * Facilita las operaciones de acceso a datos (CRUD) para la entidad {@code Foto},
+ * utilizando un identificador de clave primaria de tipo {@code Integer}.
+ * </p>
+ *
+ * @see Foto
  */
 @Repository
 public interface FotoRepository extends JpaRepository<Foto, Integer> {
-    List<Foto> findByUrl(String url);
 
 }

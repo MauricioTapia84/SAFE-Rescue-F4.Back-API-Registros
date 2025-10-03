@@ -1,8 +1,10 @@
 package com.SAFE_Rescue.API_Registros;
 
+import com.SAFE_Rescue.API_Registros.modelo.Categoria;
 import com.SAFE_Rescue.API_Registros.modelo.Estado;
 import com.SAFE_Rescue.API_Registros.modelo.Foto;
 import com.SAFE_Rescue.API_Registros.modelo.Historial;
+import com.SAFE_Rescue.API_Registros.repository.CategoriaRepository;
 import com.SAFE_Rescue.API_Registros.repository.EstadoRepository;
 import com.SAFE_Rescue.API_Registros.repository.FotoRepository;
 import com.SAFE_Rescue.API_Registros.repository.HistorialRepository;
@@ -24,6 +26,7 @@ import java.util.Optional;
 @Component
 public class DataLoader implements CommandLineRunner {
 
+    // INYECCIONES DE DEPENDENCIA
     @Autowired
     private EstadoRepository estadoRepository;
 
@@ -33,38 +36,62 @@ public class DataLoader implements CommandLineRunner {
     @Autowired
     private HistorialRepository historialRepository;
 
+    @Autowired
+    private CategoriaRepository categoriaRepository;
+
     @Override
     public void run(String... args) throws Exception {
         System.out.println("Cargando datos de registros iniciales...");
 
-        // Cargar los estados
+        // 1. Cargar las categorías
+        crearCategorias();
+
+        // 2. Cargar los estados
         crearEstados();
 
-        // CORRECCIÓN CRÍTICA: Obtener el estado 'Activo' persistido
-        List<Estado> estadoActivoList = estadoRepository.findByNombre("Activo");
+        // 3. Obtener entidades persistidas para Historial usando List<T>
+        List<Estado> estadosActivos = estadoRepository.findByNombre("Activo");
+        List<Categoria> categoriasSistema = categoriaRepository.findByNombre("Sistema");
 
-        // Verificar que el estado se haya creado
-        if (estadoActivoList!=null) {
-            Estado estadoActivo = estadoActivoList.get(0);
+        // Verificación de existencia y obtención del primer elemento de la lista
+        if (!estadosActivos.isEmpty() && !categoriasSistema.isEmpty()) {
+            Estado estadoActivo = estadosActivos.get(0);
+            Categoria categoriaSistema = categoriasSistema.get(0);
 
-            // 2. Cargar las fotos de ejemplo
+            // 4. Cargar las fotos de ejemplo
             crearFotosDeEjemplo();
 
-            // 3. Cargar el historial, usando el objeto Estado persistido
-            crearHistorial(estadoActivo);
+            // 5. Cargar el historial, usando los objetos persistidos
+            crearHistorial(estadoActivo, categoriaSistema);
         } else {
-            System.err.println("ERROR: No se pudo encontrar el estado 'Activo' después de la creación. Historial no cargado.");
+            System.err.println("ERROR: No se pudieron encontrar las entidades 'Activo' o 'Sistema' después de la creación. Historial no cargado.");
         }
 
         System.out.println("Carga de datos de registros finalizada.");
     }
 
     /**
+     * Crea y guarda las categorías predefinidas.
+     */
+    private void crearCategorias() {
+        List<String> nombresCategorias = Arrays.asList("Sistema", "Incidente","Usuario","Mensaje","Ubicación","Reporte","Curso");
+        nombresCategorias.forEach(nombre -> {
+            // Verifica si la lista devuelta por findByNombre está vacía
+            if (categoriaRepository.findByNombre(nombre).isEmpty()) {
+                Categoria categoria = new Categoria();
+                categoria.setNombre(nombre);
+                categoriaRepository.save(categoria);
+            }
+        });
+    }
+
+    /**
      * Crea y guarda los estados predefinidos para los usuarios.
      */
     private void crearEstados() {
-        List<String> nombresEstados = Arrays.asList("Activo", "Baneado", "Inactivo");
+        List<String> nombresEstados = Arrays.asList("Activo", "Baneado", "Inactivo","En Proceso","Localizado","Cerrado","Enviado","Recibido","Visto");
         nombresEstados.forEach(nombre -> {
+            // Verifica si la lista devuelta por findByNombre está vacía
             if (estadoRepository.findByNombre(nombre).isEmpty()) {
                 Estado estado = new Estado();
                 estado.setNombre(nombre);
@@ -75,6 +102,7 @@ public class DataLoader implements CommandLineRunner {
 
     /**
      * Crea y guarda fotos de ejemplo con URLs ficticias.
+     * NOTA: Carga directa sin verificar duplicados, ya que findByUrl no existe.
      */
     private void crearFotosDeEjemplo() {
         List<String> urlsDeEjemplo = Arrays.asList(
@@ -83,40 +111,48 @@ public class DataLoader implements CommandLineRunner {
                 "http://api.ejemplo.com/fotos/3.jpg"
         );
         urlsDeEjemplo.forEach(url -> {
-            // Se asume que FotoRepository tiene un método findByUrl
-            if (fotoRepository.findByUrl(url).isEmpty()) {
-                Foto foto = new Foto();
-                foto.setUrl(url);
-                fotoRepository.save(foto);
-            }
+            Foto foto = new Foto();
+            foto.setUrl(url);
+            foto.setDescripcion("Foto de ejemplo para DataLoader");
+            foto.setFechaSubida(LocalDateTime.now());
+            fotoRepository.save(foto);
         });
     }
 
     /**
      * Crea y guarda registros de historial de ejemplo.
      * @param estadoActivo El objeto Estado con el que se asociarán los registros.
+     * @param categoriaSistema El objeto Categoria con el que se asociarán los registros.
      */
-    private void crearHistorial(Estado estadoActivo) {
+    private void crearHistorial(Estado estadoActivo, Categoria categoriaSistema) {
         if (historialRepository.count() == 0) {
+
+            // Historial 1: Cambio de estado (No asociado a una asignación de usuario)
             Historial h1 = new Historial();
             h1.setEstado(estadoActivo);
+            h1.setCategoria(categoriaSistema);
             h1.setFechaHistorial(LocalDateTime.now().minusDays(10));
             h1.setDetalle("Usuario 'admin' cambió el estado de un perfil a 'Activo'.");
+            h1.setIdAsignacionUsuario(25);
             historialRepository.save(h1);
 
+            // Historial 2: Creación de Reporte (Puede implicar una asignación inicial)
             Historial h2 = new Historial();
             h2.setEstado(estadoActivo);
+            h2.setCategoria(categoriaSistema);
             h2.setFechaHistorial(LocalDateTime.now().minusDays(5));
-            h2.setDetalle("Se creó un nuevo usuario bombero con ID 5.");
-            h2.setIdUsuarioReporte(5);
+            h2.setDetalle("Se creó un nuevo reporte de bombero.");
+            h1.setIdAsignacionUsuario(5);
+            h2.setIdUsuarioReporte(1);
             historialRepository.save(h2);
 
+            // Historial 3: Envío de mensaje (No asociado a una asignación de usuario)
             Historial h3 = new Historial();
             h3.setEstado(estadoActivo);
+            h3.setCategoria(categoriaSistema);
             h3.setFechaHistorial(LocalDateTime.now());
             h3.setDetalle("Se envió un mensaje de alerta por un incidente.");
             h3.setIdEnvioMensaje(10);
-            h3.setIdIncidente(20);
             historialRepository.save(h3);
         }
     }

@@ -13,8 +13,8 @@ public class SwaggerConfig {
         //http://localhost:8080/doc/swagger-ui/index.html
         return new OpenAPI()
                 .info(new Info()
-                        .title("API 2025 Gestión de Configuraciones")
+                        .title("API 2025 Gestión de Registros")
                         .version("1.0")
-                        .description("Documentación de la API para el sistema de gestión de configuraciones"));
+                        .description("Documentación de la API para el sistema de gestión de Registros"));
     }
 }
